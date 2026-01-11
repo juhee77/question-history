@@ -116,6 +116,21 @@ function App() {
                 </div>
               </div>
             </button>
+
+            <button
+              onClick={() => handleModeSelect('group')}
+              className="group relative p-6 rounded-2xl bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-purple-500/20 hover:border-purple-500/50 transition-all active:scale-95"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-2xl shadow-lg shadow-purple-500/20">
+                  🎉
+                </div>
+                <div className="text-left">
+                  <h3 className="text-lg font-bold text-purple-100">모임/단체</h3>
+                  <p className="text-sm text-purple-200/60">우리 모임의 분위기를 UP!</p>
+                </div>
+              </div>
+            </button>
           </div>
         </motion.div>
       </div>
@@ -134,6 +149,7 @@ function App() {
           {mode === 'couple' && <Heart size={14} className="text-pink-400 fill-pink-400" />}
           {mode === 'friend' && <Users size={14} className="text-blue-400 fill-blue-400" />}
           {mode === 'family' && <Home size={14} className="text-amber-400 fill-amber-400" />}
+          {mode === 'group' && <span className="text-sm">🎉</span>}
           <span className="text-xs font-medium tracking-widest text-gray-300 uppercase">
             {mode ? questionSets[mode].label : 'LongStory'} Mode
           </span>
@@ -174,6 +190,7 @@ function App() {
           <ShareButton
             url={newUrl}
             questionText={currentQuestions[history[history.length - 1]?.q]}
+            mode={mode}
           />
         )}
       </AnimatePresence>

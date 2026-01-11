@@ -2,8 +2,18 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, Check, Share2 } from 'lucide-react';
 
-const ShareButton = ({ url, questionText }) => {
+const ShareButton = ({ url, questionText, mode }) => {
     const [copied, setCopied] = useState(false);
+
+    const getShareText = () => {
+        switch (mode) {
+            case 'couple': return '연인에게 보내기';
+            case 'friend': return '친구에게 보내기';
+            case 'family': return '가족에게 보내기';
+            case 'group': return '멤버들에게 공유하기';
+            default: return '링크 공유하기';
+        }
+    };
 
     const handleCopy = async () => {
         try {
@@ -36,7 +46,7 @@ const ShareButton = ({ url, questionText }) => {
                     ) : (
                         <>
                             <Link size={20} />
-                            <span>친구에게 보내기</span>
+                            <span>{getShareText()}</span>
                         </>
                     )}
                 </span>
