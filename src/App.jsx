@@ -4,24 +4,31 @@ import { decodeHistory, getCurrentUrlWithHistory } from './utils/urlManager';
 import Timeline from './components/Timeline';
 import QuestionCard from './components/QuestionCard';
 import ShareButton from './components/ShareButton';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Heart, Users, Home } from 'lucide-react';
+import { questionSets, defaultQuestions } from './data/questions';
 
 function App() {
   const [history, setHistory] = useState([]);
+  const [mode, setMode] = useState(null); // 'couple', 'friend', 'family'
   const [newUrl, setNewUrl] = useState('');
   const [hasAnswered, setHasAnswered] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    // 1. Load history from URL on mount
     const params = new URLSearchParams(window.location.search);
     const encodedHistory = params.get('history');
-    console.log("Encoded History:", encodedHistory);
+
     if (encodedHistory) {
       const decoded = decodeHistory(encodedHistory);
-      console.log("Decoded History:", decoded);
-      setHistory(decoded);
+      setHistory(decoded.history);
+      setMode(decoded.mode || 'couple'); // Default to couple for legacy links
     }
+    setIsLoaded(true);
   }, []);
+
+  const handleModeSelect = (selectedMode) => {
+    setMode(selectedMode);
+  };
 
   const handleAnswer = (questionId, answerText) => {
     const newItem = {
@@ -33,82 +40,137 @@ function App() {
     const updatedHistory = [...history, newItem];
     setHistory(updatedHistory);
 
-    // Generate new URL
-    const nextUrl = getCurrentUrlWithHistory(updatedHistory);
+    // Generate new URL with mode info
+    const nextUrl = getCurrentUrlWithHistory(updatedHistory, mode);
     setNewUrl(nextUrl);
     setHasAnswered(true);
 
-    // Update browser URL without reload
     window.history.pushState({ path: nextUrl }, '', nextUrl);
   };
 
+  // Get current questions based on mode
+  const currentQuestions = mode ? questionSets[mode]?.questions : defaultQuestions;
+  const themeColor = mode ? questionSets[mode]?.color : "from-indigo-500 to-purple-500";
+
+  if (!isLoaded) return null;
+
+  // Landing Screen (Mode Selection)
+  if (!mode && history.length === 0) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-white text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-md w-full space-y-8"
+        >
+          <div>
+            <h1 className="text-4xl md:text-5xl font-black mb-2 bg-clip-text text-transparent bg-gradient-to-r from-indigo-200 via-white to-indigo-200">
+              LongStory
+            </h1>
+            <p className="text-gray-400">누구와 이야기를 시작하나요?</p>
+          </div>
+
+          <div className="grid gap-4">
+            <button
+              onClick={() => handleModeSelect('couple')}
+              className="group relative p-6 rounded-2xl bg-gradient-to-br from-pink-500/10 to-rose-500/10 border border-pink-500/20 hover:border-pink-500/50 transition-all active:scale-95"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center text-2xl shadow-lg shadow-pink-500/20">
+                  ❤️
+                </div>
+                <div className="text-left">
+                  <h3 className="text-lg font-bold text-pink-100">연인과 함께</h3>
+                  <p className="text-sm text-pink-200/60">설렘 가득한 우리만의 이야기</p>
+                </div>
+              </div>
+            </button>
+
+            <button
+              onClick={() => handleModeSelect('friend')}
+              className="group relative p-6 rounded-2xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 hover:border-blue-500/50 transition-all active:scale-95"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-2xl shadow-lg shadow-blue-500/20">
+                  🤜🤛
+                </div>
+                <div className="text-left">
+                  <h3 className="text-lg font-bold text-blue-100">친구와 함께</h3>
+                  <p className="text-sm text-blue-200/60">우정의 깊이를 더하는 대화</p>
+                </div>
+              </div>
+            </button>
+
+            <button
+              onClick={() => handleModeSelect('family')}
+              className="group relative p-6 rounded-2xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 hover:border-amber-500/50 transition-all active:scale-95"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-2xl shadow-lg shadow-amber-500/20">
+                  🏡
+                </div>
+                <div className="text-left">
+                  <h3 className="text-lg font-bold text-amber-100">가족과 함께</h3>
+                  <p className="text-sm text-amber-200/60">소중한 가족과의 따뜻한 기록</p>
+                </div>
+              </div>
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen text-white p-6 md:p-12 max-w-4xl mx-auto">
+    <div className="min-h-screen text-white p-4 md:p-12 max-w-4xl mx-auto pb-32">
       {/* Header */}
-      <header className="text-center mb-16 pt-8">
+      <header className="text-center mb-12 pt-4">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-4"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-4 backdrop-blur-sm"
         >
-          <Sparkles size={14} className="text-yellow-300" />
+          {mode === 'couple' && <Heart size={14} className="text-pink-400 fill-pink-400" />}
+          {mode === 'friend' && <Users size={14} className="text-blue-400 fill-blue-400" />}
+          {mode === 'family' && <Home size={14} className="text-amber-400 fill-amber-400" />}
           <span className="text-xs font-medium tracking-widest text-gray-300 uppercase">
-            Serverless Exchange Diary
+            {mode ? questionSets[mode].label : 'LongStory'} Mode
           </span>
         </motion.div>
-        <motion.h1
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2 }}
-          className="text-4xl md:text-6xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-indigo-200 via-white to-indigo-200 drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]"
-        >
+        <h1 className="text-3xl md:text-5xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-gray-400">
           LongStory
-        </motion.h1>
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="mt-4 text-gray-400 text-sm md:text-base font-light"
-        >
-          우리의 이야기가 길어질수록, 이 링크도 자라납니다.
-        </motion.p>
+        </h1>
       </header>
 
       {/* Main Content */}
-      <main className="relative z-10">
-        {/* Timeline of previous answers */}
-        <Timeline history={history} />
+      <main className="relative z-10 space-y-12">
+        <Timeline history={history} questions={currentQuestions} />
 
-        {/* Interaction Area */}
         {!hasAnswered ? (
           <QuestionCard
+            questions={currentQuestions}
             onAnswer={handleAnswer}
             usedQuestionIds={history.map(h => h.q)}
+            themeColor={themeColor}
           />
         ) : (
-          <div className="text-center py-20">
+          <div className="text-center py-12 px-4">
             <motion.div
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
-              className="w-20 h-20 mx-auto bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(99,102,241,0.5)] mb-8"
+              className={`w-20 h-20 mx-auto bg-gradient-to-tr ${themeColor} rounded-full flex items-center justify-center shadow-lg mb-6`}
             >
               <Sparkles size={40} className="text-white" />
             </motion.div>
             <h2 className="text-2xl font-bold text-white mb-2">기록되었습니다!</h2>
-            <p className="text-gray-400 mb-12">이제 이 긴 이야기를 친구에게 보내보세요.</p>
+            <p className="text-gray-400">아래 버튼을 눌러 링크를 공유하세요.</p>
           </div>
         )}
       </main>
 
-      {/* Share Button (Fixed at bottom when answered) */}
       <AnimatePresence>
         {hasAnswered && <ShareButton url={newUrl} />}
       </AnimatePresence>
-
-      {/* Footer */}
-      <footer className="mt-20 text-center text-gray-600 text-xs pb-8">
-        <p>© 2026 LongStory. No Server, Just URL.</p>
-      </footer>
     </div>
   );
 }

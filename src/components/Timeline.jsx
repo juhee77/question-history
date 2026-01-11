@@ -1,9 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { questions } from '../data/questions';
 import { Clock, MessageCircle } from 'lucide-react';
 
-const Timeline = ({ history }) => {
+const Timeline = ({ history, questions }) => {
     if (!history || history.length === 0) return null;
 
     return (

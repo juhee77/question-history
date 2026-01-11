@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, RefreshCw } from 'lucide-react';
-import { questions } from '../data/questions';
 
-const QuestionCard = ({ onAnswer, usedQuestionIds }) => {
+const QuestionCard = ({ onAnswer, usedQuestionIds, questions, themeColor }) => {
     const [currentQIndex, setCurrentQIndex] = useState(0);
     const [answer, setAnswer] = useState('');
     const [isAnimating, setIsAnimating] = useState(false);
@@ -91,7 +90,7 @@ const QuestionCard = ({ onAnswer, usedQuestionIds }) => {
                             <button
                                 type="submit"
                                 disabled={!answer.trim()}
-                                className="group flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-indigo-500/25"
+                                className={`group flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r ${themeColor} text-white font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-indigo-500/25`}
                             >
                                 <span>기록하기</span>
                                 <Send size={18} className="group-hover:translate-x-1 transition-transform" />
