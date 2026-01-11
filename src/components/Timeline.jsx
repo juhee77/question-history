@@ -22,11 +22,12 @@ const Timeline = ({ history, questions }) => {
                         <div className="flex items-center gap-2 text-indigo-300 text-sm mb-2">
                             <span className="font-mono">#{item.q + 1}</span>
                             <span className="w-1 h-1 rounded-full bg-indigo-300/50" />
+                            <span className="font-bold text-white">{item.n || '익명'}</span>
+                            <span className="w-1 h-1 rounded-full bg-indigo-300/50" />
                             <span className="flex items-center gap-1 opacity-70">
                                 <Clock size={12} /> {item.d}
                             </span>
                         </div>
-
                         <h3 className="text-lg md:text-xl font-bold text-white mb-4 leading-relaxed">
                             {questions[item.q]}
                         </h3>

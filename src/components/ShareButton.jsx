@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, Check, Share2 } from 'lucide-react';
 
-const ShareButton = ({ url }) => {
+const ShareButton = ({ url, questionText }) => {
     const [copied, setCopied] = useState(false);
 
     const handleCopy = async () => {
         try {
-            await navigator.clipboard.writeText(url);
+            const textToCopy = `[LongStory] 오늘의 질문 💌\n\n"${questionText}"\n\n👉 답장하러 가기: ${url}`;
+            await navigator.clipboard.writeText(textToCopy);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         } catch (err) {

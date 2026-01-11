@@ -5,6 +5,7 @@ import { Send, RefreshCw } from 'lucide-react';
 const QuestionCard = ({ onAnswer, usedQuestionIds, questions, themeColor }) => {
     const [currentQIndex, setCurrentQIndex] = useState(0);
     const [answer, setAnswer] = useState('');
+    const [nickname, setNickname] = useState(localStorage.getItem('longstory_nickname') || '');
     const [isAnimating, setIsAnimating] = useState(false);
 
     // Pick a random question that hasn't been used yet (if possible)
@@ -32,7 +33,13 @@ const QuestionCard = ({ onAnswer, usedQuestionIds, questions, themeColor }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!answer.trim()) return;
-        onAnswer(currentQIndex, answer);
+
+        // Save nickname for next time
+        if (nickname.trim()) {
+            localStorage.setItem('longstory_nickname', nickname.trim());
+        }
+
+        onAnswer(currentQIndex, answer, nickname.trim() || '익명');
         setAnswer('');
     };
 
@@ -78,13 +85,23 @@ const QuestionCard = ({ onAnswer, usedQuestionIds, questions, themeColor }) => {
                     </AnimatePresence>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        <textarea
-                            value={answer}
-                            onChange={(e) => setAnswer(e.target.value)}
-                            placeholder="당신의 이야기를 들려주세요..."
-                            className="w-full h-32 p-4 rounded-xl glass-input resize-none text-lg placeholder-gray-500 focus:ring-2 focus:ring-indigo-500/50 transition-all"
-                            maxLength={300}
-                        />
+                        <div>
+                            <input
+                                type="text"
+                                value={nickname}
+                                onChange={(e) => setNickname(e.target.value)}
+                                placeholder="이름 (선택)"
+                                className="w-full p-3 rounded-xl glass-input text-base placeholder-gray-500 focus:ring-2 focus:ring-indigo-500/50 transition-all mb-2"
+                                maxLength={10}
+                            />
+                            <textarea
+                                value={answer}
+                                onChange={(e) => setAnswer(e.target.value)}
+                                placeholder="당신의 이야기를 들려주세요..."
+                                className="w-full h-32 p-4 rounded-xl glass-input resize-none text-lg placeholder-gray-500 focus:ring-2 focus:ring-indigo-500/50 transition-all"
+                                maxLength={300}
+                            />
+                        </div>
                         <div className="flex justify-between items-center text-sm text-gray-500 px-1">
                             <span>{answer.length} / 300</span>
                             <button

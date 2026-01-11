@@ -30,10 +30,11 @@ function App() {
     setMode(selectedMode);
   };
 
-  const handleAnswer = (questionId, answerText) => {
+  const handleAnswer = (questionId, answerText, nickname) => {
     const newItem = {
       q: questionId,
       a: answerText,
+      n: nickname, // Nickname
       d: new Date().toLocaleDateString('ko-KR', { year: '2-digit', month: 'numeric', day: 'numeric' })
     };
 
@@ -169,7 +170,12 @@ function App() {
       </main>
 
       <AnimatePresence>
-        {hasAnswered && <ShareButton url={newUrl} />}
+        {hasAnswered && (
+          <ShareButton
+            url={newUrl}
+            questionText={currentQuestions[history[history.length - 1]?.q]}
+          />
+        )}
       </AnimatePresence>
     </div>
   );
