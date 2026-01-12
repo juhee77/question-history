@@ -5,7 +5,21 @@ const lz = LZString.default || LZString;
 
 export const encodeHistory = (history) => {
     try {
-        const jsonString = JSON.stringify(history);
+        // Optimize: Convert array of objects to array of arrays to save space
+        // [q, n, d, a] -> questionId, nickname, date, answer
+        const optimizedHistory = history.history.map(item => [
+            item.q,
+            item.n,
+            item.d,
+            item.a
+        ]);
+
+        const data = {
+            m: history.mode, // mode -> m
+            h: optimizedHistory // history -> h
+        };
+
+        const jsonString = JSON.stringify(data);
         return lz.compressToEncodedURIComponent(jsonString);
     } catch (error) {
         console.error("Encoding failed:", error);
@@ -21,7 +35,18 @@ export const decodeHistory = (encodedString) => {
 
         const parsed = JSON.parse(jsonString);
 
-        // New format: { mode: 'couple', history: [...] }
+        // V2 format: { m: 'couple', h: [[q,n,d,a], ...] }
+        if (parsed.m && Array.isArray(parsed.h)) {
+            const restoredHistory = parsed.h.map(item => ({
+                q: item[0],
+                n: item[1],
+                d: item[2],
+                a: item[3]
+            }));
+            return { mode: parsed.m, history: restoredHistory };
+        }
+
+        // V1 format: { mode: 'couple', history: [...] }
         if (parsed.mode && Array.isArray(parsed.history)) {
             return parsed;
         }
@@ -39,7 +64,7 @@ export const decodeHistory = (encodedString) => {
 };
 
 export const getCurrentUrlWithHistory = (history, mode) => {
-    // Always save in new format
+    // Pass the whole object to encodeHistory to handle structure optimization there
     const data = { mode, history };
     const encoded = encodeHistory(data);
     const url = new URL(window.location.href);

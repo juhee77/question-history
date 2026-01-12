@@ -13,6 +13,7 @@ function App() {
   const [newUrl, setNewUrl] = useState('');
   const [hasAnswered, setHasAnswered] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [targetQuestionId, setTargetQuestionId] = useState(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -30,6 +31,12 @@ function App() {
     setMode(selectedMode);
   };
 
+  const handleRetry = (questionId) => {
+    setTargetQuestionId(questionId);
+    setHasAnswered(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleAnswer = (questionId, answerText, nickname) => {
     const newItem = {
       q: questionId,
@@ -45,6 +52,7 @@ function App() {
     const nextUrl = getCurrentUrlWithHistory(updatedHistory, mode);
     setNewUrl(nextUrl);
     setHasAnswered(true);
+    setTargetQuestionId(null);
 
     window.history.pushState({ path: nextUrl }, '', nextUrl);
   };
@@ -161,7 +169,7 @@ function App() {
 
       {/* Main Content */}
       <main className="relative z-10 space-y-12">
-        <Timeline history={history} questions={currentQuestions} />
+        <Timeline history={history} questions={currentQuestions} onRetry={handleRetry} />
 
         {!hasAnswered ? (
           <QuestionCard
@@ -169,6 +177,7 @@ function App() {
             onAnswer={handleAnswer}
             usedQuestionIds={history.map(h => h.q)}
             themeColor={themeColor}
+            targetQuestionId={targetQuestionId}
           />
         ) : (
           <div className="text-center py-12 px-4">

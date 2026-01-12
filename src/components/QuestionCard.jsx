@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, RefreshCw } from 'lucide-react';
 
-const QuestionCard = ({ onAnswer, usedQuestionIds, questions, themeColor }) => {
+const QuestionCard = ({ onAnswer, usedQuestionIds, questions, themeColor, targetQuestionId }) => {
     const [currentQIndex, setCurrentQIndex] = useState(0);
     const [answer, setAnswer] = useState('');
     const [nickname, setNickname] = useState(localStorage.getItem('longstory_nickname') || '');
@@ -10,6 +10,9 @@ const QuestionCard = ({ onAnswer, usedQuestionIds, questions, themeColor }) => {
 
     // Pick a random question that hasn't been used yet (if possible)
     const pickRandomQuestion = () => {
+        // If a specific question is targeted, don't pick a random one
+        if (targetQuestionId !== null && targetQuestionId !== undefined) return;
+
         if (!questions || questions.length === 0) return;
         setIsAnimating(true);
         setTimeout(() => {
@@ -26,9 +29,16 @@ const QuestionCard = ({ onAnswer, usedQuestionIds, questions, themeColor }) => {
         }, 300);
     };
 
+    // Handle target question changes
     useEffect(() => {
-        pickRandomQuestion();
-    }, [usedQuestionIds]);
+        if (targetQuestionId !== null && targetQuestionId !== undefined) {
+            setCurrentQIndex(targetQuestionId);
+        } else {
+            // Only pick random if we're not targeting a specific question
+            // and we haven't set an initial question yet (or usedQuestionIds changed)
+            pickRandomQuestion();
+        }
+    }, [targetQuestionId, usedQuestionIds]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
