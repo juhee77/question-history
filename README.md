@@ -3,7 +3,8 @@
 > **"우리의 이야기가 길어질수록, 이 링크도 자라납니다."**  
 > 서버 없이 오직 URL만으로 이어지는, 가장 가볍고 영원한 교환일기 서비스.
 
-![LongStory Preview](https://via.placeholder.com/800x400?text=LongStory+Preview)
+<img src="public/favicon.svg" width="200" height="200">
+
 
 ## ✨ 주요 기능
 
