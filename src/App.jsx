@@ -14,6 +14,7 @@ function App() {
   const [hasAnswered, setHasAnswered] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [targetQuestionId, setTargetQuestionId] = useState(null);
+  const [showReplyPrompt, setShowReplyPrompt] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -23,6 +24,10 @@ function App() {
       const decoded = decodeHistory(encodedHistory);
       setHistory(decoded.history);
       setMode(decoded.mode || 'couple'); // Default to couple for legacy links
+      // If there is history, show the reply prompt
+      if (decoded.history && decoded.history.length > 0) {
+        setShowReplyPrompt(true);
+      }
     }
     setIsLoaded(true);
   }, []);
@@ -34,7 +39,21 @@ function App() {
   const handleRetry = (questionId) => {
     setTargetQuestionId(questionId);
     setHasAnswered(false);
+    setShowReplyPrompt(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleReplySame = () => {
+    if (history.length > 0) {
+      const lastQ = history[history.length - 1].q;
+      setTargetQuestionId(lastQ);
+      setShowReplyPrompt(false);
+    }
+  };
+
+  const handleReplyNew = () => {
+    setTargetQuestionId(null);
+    setShowReplyPrompt(false);
   };
 
   const handleAnswer = (questionId, answerText, nickname) => {
@@ -148,7 +167,18 @@ function App() {
   return (
     <div className="min-h-screen text-white p-4 md:p-12 max-w-4xl mx-auto pb-32">
       {/* Header */}
-      <header className="text-center mb-12 pt-4">
+      <header className="text-center mb-12 pt-4 relative">
+        <div className="absolute top-4 right-0 md:right-4">
+          <button
+            onClick={() => window.location.href = window.location.pathname}
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-sm text-gray-300 hover:text-white backdrop-blur-sm border border-white/10"
+          >
+            <Sparkles size={14} />
+            <span className="hidden md:inline">새 이야기 시작하기</span>
+            <span className="md:hidden">새로 만들기</span>
+          </button>
+        </div>
+
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -171,7 +201,42 @@ function App() {
       <main className="relative z-10 space-y-12">
         <Timeline history={history} questions={currentQuestions} onRetry={handleRetry} />
 
-        {!hasAnswered ? (
+        {!hasAnswered && showReplyPrompt ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="w-full max-w-2xl mx-auto mt-12 mb-20 glass-card p-8 rounded-3xl border border-indigo-500/30 text-center"
+          >
+            <div className="w-16 h-16 mx-auto bg-indigo-500/20 rounded-full flex items-center justify-center mb-6">
+              <Sparkles size={32} className="text-indigo-300" />
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-4">
+              새로운 답변이 도착했어요!
+            </h2>
+            <p className="text-gray-300 mb-8 leading-relaxed">
+              {history.length > 0 && history[history.length - 1].n ?
+                `${history[history.length - 1].n}님이 남긴 이야기에요.` :
+                '누군가 이야기를 남겼어요.'}
+              <br />
+              같은 질문에 대답하거나, 새로운 질문으로 이어가보세요.
+            </p>
+
+            <div className="flex flex-col md:flex-row gap-4 justify-center">
+              <button
+                onClick={handleReplySame}
+                className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition-all shadow-lg shadow-indigo-500/25"
+              >
+                이 질문에 나도 대답하기
+              </button>
+              <button
+                onClick={handleReplyNew}
+                className="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold transition-all border border-white/10"
+              >
+                새로운 질문 받기
+              </button>
+            </div>
+          </motion.div>
+        ) : !hasAnswered ? (
           <QuestionCard
             questions={currentQuestions}
             onAnswer={handleAnswer}
@@ -200,6 +265,15 @@ function App() {
             url={newUrl}
             questionText={currentQuestions[history[history.length - 1]?.q]}
             mode={mode}
+            lastAnswerData={history.length > 0 ? {
+              question: currentQuestions[history[history.length - 1].q],
+              answer: history[history.length - 1].a,
+              nickname: history[history.length - 1].n,
+              date: history[history.length - 1].d
+            } : null}
+            themeColor={themeColor}
+            history={history}
+            questions={currentQuestions}
           />
         )}
       </AnimatePresence>
